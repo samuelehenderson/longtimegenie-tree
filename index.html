@@ -15,6 +15,11 @@
         <h1 class="brand__name">LongTimeGenie Tree</h1>
         <p class="brand__tag">Genealogy research workspace</p>
       </div>
+      <div class="header-actions" id="header-actions" hidden>
+        <span class="loaded-pill" id="loaded-pill"></span>
+        <button class="btn btn--ghost" id="btn-reload" type="button">Load different file</button>
+        <button class="btn btn--ghost" id="btn-toggle-json" type="button">Show raw JSON</button>
+      </div>
     </div>
   </header>
 
@@ -34,9 +39,41 @@
       <p class="status" id="status" role="status" aria-live="polite"></p>
     </section>
 
+    <section class="workspace" id="workspace" hidden>
+      <aside class="pane pane--list">
+        <div class="pane__head">
+          <h2 class="section-title">People</h2>
+          <input
+            type="search"
+            class="search-input"
+            id="search-input"
+            placeholder="Search by name…"
+            aria-label="Search people"
+          />
+          <p class="pane__hint" id="list-summary"></p>
+        </div>
+        <div class="person-list" id="person-list" role="listbox" tabindex="0"></div>
+      </aside>
+
+      <section class="pane pane--tree">
+        <div class="pane__head">
+          <h2 class="section-title">Tree</h2>
+          <p class="pane__hint">Click any person to re-center the tree.</p>
+        </div>
+        <div class="tree-canvas" id="tree-canvas" aria-live="polite"></div>
+      </section>
+
+      <aside class="pane pane--detail">
+        <div class="pane__head">
+          <h2 class="section-title">Details</h2>
+        </div>
+        <div class="detail-content" id="detail-content"></div>
+      </aside>
+    </section>
+
     <section class="output" id="output" hidden>
       <div class="output__header">
-        <h2 class="section-title">Parsed data</h2>
+        <h2 class="section-title">Raw parsed data</h2>
         <div class="summary" id="summary"></div>
       </div>
       <pre class="json-view" id="json-view"></pre>
@@ -44,7 +81,7 @@
   </main>
 
   <footer class="app-footer">
-    <small>LongTimeGenie Tree · v0.1 · all data stays local</small>
+    <small>LongTimeGenie Tree · v0.2 · all data stays local</small>
   </footer>
 
   <script type="module" src="/src/main.js"></script>

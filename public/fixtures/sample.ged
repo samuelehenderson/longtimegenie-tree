@@ -8,16 +8,22 @@
 1 CHAR UTF-8
 0 @I1@ INDI
 1 NAME John /Smith/
+2 GIVN John
+2 SURN Smith
 1 SEX M
 1 BIRT
 2 DATE 12 MAR 1880
 2 PLAC Springfield, Illinois, USA
+2 SOUR @S1@
+3 PAGE 1880 Census, Sangamon County
 1 DEAT
 2 DATE 4 JUL 1955
 2 PLAC Chicago, Illinois, USA
 1 FAMS @F1@
 0 @I2@ INDI
 1 NAME Mary /Johnson/
+2 GIVN Mary
+2 SURN Johnson
 1 SEX F
 1 BIRT
 2 DATE 22 SEP 1885
@@ -28,14 +34,46 @@
 1 FAMS @F1@
 0 @I3@ INDI
 1 NAME Robert /Smith/
+2 GIVN Robert
+2 SURN Smith
 1 SEX M
 1 BIRT
 2 DATE 5 MAY 1910
 2 PLAC Chicago, Illinois, USA
+2 SOUR @S2@
+3 PAGE Cook County Birth Index, Vol 12 p.85
 1 DEAT
 2 DATE 30 NOV 1988
 2 PLAC Madison, Wisconsin, USA
 1 FAMC @F1@
+1 FAMS @F2@
+0 @I4@ INDI
+1 NAME Eleanor /Davis/
+2 GIVN Eleanor
+2 SURN Davis
+1 SEX F
+1 BIRT
+2 DATE 18 FEB 1912
+2 PLAC Milwaukee, Wisconsin, USA
+1 FAMS @F2@
+0 @I5@ INDI
+1 NAME Susan /Smith/
+2 GIVN Susan
+2 SURN Smith
+1 SEX F
+1 BIRT
+2 DATE 9 OCT 1940
+2 PLAC Madison, Wisconsin, USA
+1 FAMC @F2@
+0 @I6@ INDI
+1 NAME James /Smith/
+2 GIVN James
+2 SURN Smith
+1 SEX M
+1 BIRT
+2 DATE 14 APR 1943
+2 PLAC Madison, Wisconsin, USA
+1 FAMC @F2@
 0 @F1@ FAM
 1 HUSB @I1@
 1 WIFE @I2@
@@ -43,8 +81,26 @@
 1 MARR
 2 DATE 14 JUN 1908
 2 PLAC Springfield, Illinois, USA
+2 SOUR @S3@
+3 PAGE Illinois Marriages, Sangamon County
+0 @F2@ FAM
+1 HUSB @I3@
+1 WIFE @I4@
+1 CHIL @I5@
+1 CHIL @I6@
+1 MARR
+2 DATE 22 AUG 1938
+2 PLAC Madison, Wisconsin, USA
 0 @S1@ SOUR
-1 TITL 1910 United States Federal Census
+1 TITL 1880 United States Federal Census
 1 AUTH United States Census Bureau
 1 PUBL National Archives, Washington DC
+0 @S2@ SOUR
+1 TITL Cook County, Illinois Birth Index 1871-1922
+1 AUTH Cook County Clerk
+1 PUBL Illinois State Archives
+0 @S3@ SOUR
+1 TITL Illinois Marriage Records 1763-1900
+1 AUTH Illinois State Archives
+1 PUBL Springfield, IL
 0 TRLR

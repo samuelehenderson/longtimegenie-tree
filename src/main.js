@@ -1,59 +1,138 @@
 import { parseGedcom } from './gedcom/parser.js';
 import { initImporter } from './ui/importer.js';
+import { initPersonList } from './search/list.js';
+import { renderTree } from './tree/render.js';
+import { renderPersonDetail } from './detail/panel.js';
 
-const dropzone  = document.getElementById('dropzone');
-const fileInput = document.getElementById('file-input');
-const status    = document.getElementById('status');
+// ---------- DOM refs ----------
+const dropzone   = document.getElementById('dropzone');
+const fileInput  = document.getElementById('file-input');
+const status     = document.getElementById('status');
+const importer   = document.getElementById('importer');
+const workspace  = document.getElementById('workspace');
+const headerActions = document.getElementById('header-actions');
+const loadedPill = document.getElementById('loaded-pill');
+const btnReload  = document.getElementById('btn-reload');
+const btnToggleJson = document.getElementById('btn-toggle-json');
+
+const personListEl = document.getElementById('person-list');
+const listSummary  = document.getElementById('list-summary');
+const searchInput  = document.getElementById('search-input');
+const treeCanvas   = document.getElementById('tree-canvas');
+const detailContent = document.getElementById('detail-content');
+
 const output    = document.getElementById('output');
 const summary   = document.getElementById('summary');
 const jsonView  = document.getElementById('json-view');
 
+// ---------- state ----------
+let model = null;
+let focusId = null;
+let listApi = null;
+
+// ---------- importer ----------
 initImporter({
   dropzone,
   fileInput,
   status,
-  onLoad: ({ text }) => {
-    let model;
+  onLoad: ({ text, file }) => {
+    let parsed;
     try {
-      model = parseGedcom(text);
+      parsed = parseGedcom(text);
     } catch (err) {
       status.textContent = `Parse error: ${err.message}`;
       status.classList.add('status--error');
       return;
     }
-    renderOutput(model);
+    loadModel(parsed, file);
   },
   onError: (err) => console.error(err)
 });
 
-function renderOutput(model) {
-  output.hidden = false;
-  summary.innerHTML = '';
-  for (const [label, count] of [
-    ['persons',   model.persons.length],
-    ['families',  model.families.length],
-    ['sources',   model.sources.length]
-  ]) {
-    const chip = document.createElement('span');
-    chip.className = 'summary__chip';
-    chip.textContent = `${count} ${label}`;
-    summary.appendChild(chip);
-  }
+btnReload?.addEventListener('click', () => {
+  importer.hidden = false;
+  workspace.hidden = true;
+  output.hidden = true;
+  headerActions.hidden = true;
+  status.textContent = '';
+  status.classList.remove('status--ok', 'status--error');
+  fileInput.value = '';
+  importer.scrollIntoView({ behavior: 'smooth' });
+});
 
-  // Strip the bulky `raw` nodes for readability — they're useful at runtime
-  // but noisy in JSON view.
-  const display = {
-    header: model.header,
-    persons:  model.persons.map(stripRaw),
-    families: model.families.map(stripRaw),
-    sources:  model.sources.map(stripRaw)
-  };
+btnToggleJson?.addEventListener('click', () => {
+  output.hidden = !output.hidden;
+  btnToggleJson.textContent = output.hidden ? 'Show raw JSON' : 'Hide raw JSON';
+  if (!output.hidden) output.scrollIntoView({ behavior: 'smooth' });
+});
 
-  jsonView.textContent = JSON.stringify(display, null, 2);
-  output.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// ---------- model loaded ----------
+function loadModel(parsed, file) {
+  model = parsed;
+
+  // Show workspace, hide importer
+  importer.hidden = true;
+  workspace.hidden = false;
+  headerActions.hidden = false;
+  loadedPill.textContent = file
+    ? `${file.name} · ${parsed.persons.length} people`
+    : `${parsed.persons.length} people`;
+
+  // Pre-populate the JSON view (kept hidden until requested)
+  populateJsonView(parsed);
+
+  // Initialize the person list with search
+  listApi = initPersonList({
+    container: personListEl,
+    summary: listSummary,
+    searchInput,
+    model: parsed,
+    onSelect: setFocus,
+    getActiveId: () => focusId
+  });
+
+  // Pick a sensible initial focus: first person sorted by surname
+  const initial = chooseInitialFocus(parsed);
+  setFocus(initial);
 }
 
-function stripRaw(obj) {
-  const { raw, ...rest } = obj;
-  return rest;
+function chooseInitialFocus(m) {
+  if (!m.persons.length) return null;
+  // Prefer a person with both spouse + children, else any with a spouse,
+  // else first person alphabetically.
+  const withFamily = m.persons.find((p) => {
+    const fams = p.families.map((id) => m.byId.family.get(id)).filter(Boolean);
+    return fams.some((f) => f.childIds?.length > 0);
+  });
+  if (withFamily) return withFamily.id;
+  const withSpouse = m.persons.find((p) => p.families.length > 0);
+  return (withSpouse || m.persons[0]).id;
+}
+
+function setFocus(id) {
+  if (!model) return;
+  focusId = id;
+  renderTree({ container: treeCanvas, model, focusId, onSelect: setFocus });
+  renderPersonDetail({ container: detailContent, model, focusId, onSelect: setFocus });
+  listApi?.rerender();
+}
+
+function populateJsonView(parsed) {
+  const counts = [
+    ['persons',  parsed.persons.length],
+    ['families', parsed.families.length],
+    ['sources',  parsed.sources.length]
+  ];
+  summary.innerHTML = counts.map(([label, n]) =>
+    `<span class="summary__chip">${n} ${label}</span>`
+  ).join('');
+
+  const stripRaw = ({ raw, ...rest }) => rest;
+  const display = {
+    header: parsed.header,
+    persons:  parsed.persons.map(stripRaw),
+    families: parsed.families.map(stripRaw),
+    sources:  parsed.sources.map(stripRaw)
+  };
+  jsonView.textContent = JSON.stringify(display, null, 2);
 }
