@@ -2,6 +2,7 @@ import { parseGedcom } from './gedcom/parser.js';
 import { initImporter } from './ui/importer.js';
 import { initPersonList } from './search/list.js';
 import { renderTree } from './tree/render.js';
+import { renderTimeline } from './timeline/render.js';
 import { renderPersonDetail } from './detail/panel.js';
 
 // ---------- DOM refs ----------
@@ -18,7 +19,9 @@ const btnToggleJson = document.getElementById('btn-toggle-json');
 const personListEl = document.getElementById('person-list');
 const listSummary  = document.getElementById('list-summary');
 const searchInput  = document.getElementById('search-input');
-const treeCanvas   = document.getElementById('tree-canvas');
+const viewCanvas   = document.getElementById('view-canvas');
+const viewHint     = document.getElementById('view-hint');
+const viewToggleBtns = document.querySelectorAll('.view-toggle__btn');
 const detailContent = document.getElementById('detail-content');
 
 const output    = document.getElementById('output');
@@ -29,6 +32,25 @@ const jsonView  = document.getElementById('json-view');
 let model = null;
 let focusId = null;
 let listApi = null;
+let currentView = 'tree';
+
+const VIEW_HINTS = {
+  tree:     'Click any person to re-center the tree.',
+  timeline: 'Bars span birth → death. Click a row to update the details.'
+};
+
+viewToggleBtns.forEach((btn) => {
+  btn.addEventListener('click', () => setView(btn.dataset.view));
+});
+
+function setView(view) {
+  if (view !== 'tree' && view !== 'timeline') return;
+  currentView = view;
+  viewToggleBtns.forEach((b) => b.classList.toggle('view-toggle__btn--active', b.dataset.view === view));
+  viewHint.textContent = VIEW_HINTS[view];
+  viewCanvas.classList.toggle('view-canvas--timeline', view === 'timeline');
+  renderCurrentView();
+}
 
 // ---------- importer ----------
 initImporter({
@@ -112,9 +134,18 @@ function chooseInitialFocus(m) {
 function setFocus(id) {
   if (!model) return;
   focusId = id;
-  renderTree({ container: treeCanvas, model, focusId, onSelect: setFocus });
+  renderCurrentView();
   renderPersonDetail({ container: detailContent, model, focusId, onSelect: setFocus });
   listApi?.rerender();
+}
+
+function renderCurrentView() {
+  if (!model) return;
+  if (currentView === 'timeline') {
+    renderTimeline({ container: viewCanvas, model, focusId, onSelect: setFocus });
+  } else {
+    renderTree({ container: viewCanvas, model, focusId, onSelect: setFocus });
+  }
 }
 
 function populateJsonView(parsed) {

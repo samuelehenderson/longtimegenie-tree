@@ -55,12 +55,15 @@
         <div class="person-list" id="person-list" role="listbox" tabindex="0"></div>
       </aside>
 
-      <section class="pane pane--tree">
-        <div class="pane__head">
-          <h2 class="section-title">Tree</h2>
-          <p class="pane__hint">Click any person to re-center the tree.</p>
+      <section class="pane pane--center">
+        <div class="pane__head pane__head--with-toggle">
+          <div class="view-toggle" role="tablist" aria-label="View mode">
+            <button class="view-toggle__btn view-toggle__btn--active" type="button" data-view="tree" role="tab">Tree</button>
+            <button class="view-toggle__btn" type="button" data-view="timeline" role="tab">Timeline</button>
+          </div>
+          <p class="pane__hint" id="view-hint">Click any person to re-center the tree.</p>
         </div>
-        <div class="tree-canvas" id="tree-canvas" aria-live="polite"></div>
+        <div class="view-canvas" id="view-canvas" aria-live="polite"></div>
       </section>
 
       <aside class="pane pane--detail">
