@@ -1,0 +1,50 @@
+0 HEAD
+1 SOUR LongTimeGenie
+2 NAME LongTimeGenie Tree
+2 VERS 0.1
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME John /Smith/
+1 SEX M
+1 BIRT
+2 DATE 12 MAR 1880
+2 PLAC Springfield, Illinois, USA
+1 DEAT
+2 DATE 4 JUL 1955
+2 PLAC Chicago, Illinois, USA
+1 FAMS @F1@
+0 @I2@ INDI
+1 NAME Mary /Johnson/
+1 SEX F
+1 BIRT
+2 DATE 22 SEP 1885
+2 PLAC Peoria, Illinois, USA
+1 DEAT
+2 DATE 18 JAN 1962
+2 PLAC Chicago, Illinois, USA
+1 FAMS @F1@
+0 @I3@ INDI
+1 NAME Robert /Smith/
+1 SEX M
+1 BIRT
+2 DATE 5 MAY 1910
+2 PLAC Chicago, Illinois, USA
+1 DEAT
+2 DATE 30 NOV 1988
+2 PLAC Madison, Wisconsin, USA
+1 FAMC @F1@
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+1 MARR
+2 DATE 14 JUN 1908
+2 PLAC Springfield, Illinois, USA
+0 @S1@ SOUR
+1 TITL 1910 United States Federal Census
+1 AUTH United States Census Bureau
+1 PUBL National Archives, Washington DC
+0 TRLR

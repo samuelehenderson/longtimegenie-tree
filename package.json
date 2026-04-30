@@ -1,0 +1,19 @@
+{
+  "name": "longtimegenie-tree",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Web-based genealogy research tool for LongTimeGenie. Static site, all client-side.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "html2pdf.js": "^0.10.2",
+    "parse-gedcom": "^2.0.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.10"
+  }
+}

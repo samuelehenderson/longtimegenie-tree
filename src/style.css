@@ -1,0 +1,214 @@
+/* ==========================================================================
+   LongTimeGenie Tree — base styles
+   Brand palette: forest #2d5016 · terracotta #c87456 · wheat #d4a574 · cream #faf6ed
+   ========================================================================== */
+
+:root {
+  --forest: #2d5016;
+  --forest-dark: #1f3810;
+  --terracotta: #c87456;
+  --wheat: #d4a574;
+  --cream: #faf6ed;
+  --ink: #2a2520;
+  --muted: #6b6357;
+  --rule: #e8dfc9;
+
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, system-ui, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  --radius: 10px;
+  --shadow-sm: 0 1px 2px rgba(45, 80, 22, 0.08);
+  --shadow-md: 0 6px 20px rgba(45, 80, 22, 0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- header ---------- */
+.app-header {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 1.25rem 2rem;
+  border-bottom: 4px solid var(--wheat);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.brand__mark {
+  font-size: 2rem;
+  color: var(--wheat);
+  line-height: 1;
+}
+
+.brand__name {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.55rem;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.brand__tag {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--wheat);
+  opacity: 0.92;
+}
+
+/* ---------- main ---------- */
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section-title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: var(--forest);
+  margin: 0 0 0.4rem;
+}
+
+.section-help {
+  color: var(--muted);
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+}
+
+/* ---------- importer ---------- */
+.importer {
+  background: white;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.dropzone {
+  margin-top: 0.5rem;
+  border: 2px dashed var(--wheat);
+  border-radius: var(--radius);
+  background: var(--cream);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.dropzone:hover,
+.dropzone:focus,
+.dropzone--drag {
+  background: #f5eed9;
+  border-color: var(--terracotta);
+  outline: none;
+}
+
+.dropzone__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.dropzone__label strong {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  color: var(--forest);
+}
+
+.dropzone__label span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  min-height: 1.2em;
+}
+
+.status--error { color: #8b2e2e; }
+.status--ok    { color: var(--forest); }
+
+/* ---------- output ---------- */
+.output {
+  background: white;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.output__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.summary {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.summary__chip {
+  background: var(--wheat);
+  color: var(--forest-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.json-view {
+  background: #1f2a17;
+  color: #e8dfc9;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  max-height: 60vh;
+  overflow: auto;
+  margin: 0;
+}
+
+/* ---------- footer ---------- */
+.app-footer {
+  text-align: center;
+  padding: 1rem 2rem 1.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
