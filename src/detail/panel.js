@@ -1,9 +1,15 @@
 // Person detail panel — renders the focused person's facts, relationships,
-// and source citations grouped by the event they're attached to.
+// source citations, and a free-text research notes box.
+//
+// Notes are passed in via `notes` (a Map of personId -> text); changes
+// flow back through `onNoteChange(personId, text)`. Persistence is the
+// caller's job — this module only handles render + debounce.
 
 import { lifespan, escapeHtml, eventLabel } from '../util/format.js';
 
-export function renderPersonDetail({ container, model, focusId, onSelect }) {
+const NOTE_DEBOUNCE_MS = 400;
+
+export function renderPersonDetail({ container, model, focusId, onSelect, notes, onNoteChange }) {
   container.innerHTML = '';
 
   if (!focusId) {
@@ -36,6 +42,9 @@ export function renderPersonDetail({ container, model, focusId, onSelect }) {
   const citationsHtml = renderCitations(person, model);
   if (citationsHtml) parts.push(citationsHtml);
 
+  // ---- notes ----
+  parts.push(renderNotesSection(notes?.get(person.id) || ''));
+
   container.innerHTML = parts.join('');
 
   container.querySelectorAll('.relation-link').forEach((el) => {
@@ -44,6 +53,55 @@ export function renderPersonDetail({ container, model, focusId, onSelect }) {
       const id = el.dataset.id;
       if (id) onSelect?.(id);
     });
+  });
+
+  bindNotesField(container, person.id, onNoteChange);
+}
+
+function renderNotesSection(initialText) {
+  return `
+    <div class="detail-section detail-section--notes">
+      <p class="detail-section__title">
+        Research notes
+        <span class="note-status" data-note-status></span>
+      </p>
+      <textarea
+        class="note-field"
+        data-note-field
+        rows="6"
+        placeholder="Anything to remember about this person — interview notes, contradictions to chase, sources still to find…"
+      >${escapeHtml(initialText)}</textarea>
+    </div>
+  `;
+}
+
+function bindNotesField(container, personId, onNoteChange) {
+  if (!onNoteChange) return;
+  const field = container.querySelector('[data-note-field]');
+  const status = container.querySelector('[data-note-status]');
+  if (!field) return;
+
+  let debounceTimer = null;
+  let savedTimer = null;
+
+  field.addEventListener('input', () => {
+    if (status) status.textContent = 'Saving…';
+    if (savedTimer) clearTimeout(savedTimer);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      try {
+        await onNoteChange(personId, field.value);
+        if (status) {
+          status.textContent = 'Saved';
+          savedTimer = setTimeout(() => {
+            if (status.textContent === 'Saved') status.textContent = '';
+          }, 1500);
+        }
+      } catch (err) {
+        if (status) status.textContent = 'Save failed';
+        console.warn('[notes] save failed', err);
+      }
+    }, NOTE_DEBOUNCE_MS);
   });
 }
 

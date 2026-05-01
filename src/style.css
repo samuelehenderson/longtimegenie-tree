@@ -757,6 +757,18 @@ body:not([data-active-tab="tree"]) #header-actions {
   font-size: 1rem;
   color: var(--ink);
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.person-row__note-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--terracotta);
+  flex: none;
+  display: inline-block;
 }
 
 .person-row__dates {
@@ -1107,6 +1119,47 @@ body:not([data-active-tab="tree"]) #header-actions {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---------- research notes ---------- */
+.detail-section--notes .note-field {
+  width: 100%;
+  min-height: 6rem;
+  resize: vertical;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  line-height: 1.45;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.detail-section--notes .note-field:focus {
+  outline: none;
+  border-color: var(--terracotta);
+  background: white;
+}
+
+.detail-section--notes .note-field::placeholder {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.note-status {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--sans);
+  min-height: 1em;
 }
 
 .fact {
