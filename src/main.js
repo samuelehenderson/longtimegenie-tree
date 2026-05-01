@@ -19,6 +19,7 @@ import {
 import { setTreeModel } from './state/tree-model.js';
 import { initDuplicatesPanel } from './ui/duplicates-panel.js';
 import { exportTreeAsPng, suggestedTreeFilename } from './ui/tree-export.js';
+import { initMapPanel } from './map/page.js';
 
 registerServiceWorker();
 initInstallPrompt();
@@ -149,6 +150,14 @@ initDuplicatesPanel({
   panel:    document.getElementById('duplicates'),
   summary:  document.getElementById('duplicates-summary'),
   list:     document.getElementById('duplicates-list'),
+  getModel: () => model,
+  onSelectPerson: setFocus,
+});
+
+initMapPanel({
+  openBtn:  document.getElementById('btn-show-map'),
+  closeBtn: document.getElementById('btn-close-map'),
+  panel:    document.getElementById('map-panel'),
   getModel: () => model,
   onSelectPerson: setFocus,
 });

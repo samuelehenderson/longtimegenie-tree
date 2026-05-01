@@ -26,6 +26,7 @@
       <div class="header-actions" id="header-actions" hidden>
         <span class="loaded-pill" id="loaded-pill"></span>
         <button class="btn btn--ghost" id="btn-reload" type="button">Load different file</button>
+        <button class="btn btn--ghost" id="btn-show-map" type="button">Show map</button>
         <button class="btn btn--ghost" id="btn-find-duplicates" type="button">Find duplicates</button>
         <button class="btn btn--ghost" id="btn-export-image" type="button">Save as image</button>
         <button class="btn btn--ghost" id="btn-toggle-json" type="button">Show raw JSON</button>
@@ -96,6 +97,17 @@
           </div>
           <div class="detail-content" id="detail-content"></div>
         </aside>
+      </section>
+
+      <section class="map-panel" id="map-panel" hidden>
+        <div class="map-panel__header">
+          <div>
+            <h2 class="section-title">Places on a map</h2>
+            <p class="map-panel__summary" data-map-summary></p>
+          </div>
+          <button class="btn btn--ghost-on-light" id="btn-close-map" type="button">Close</button>
+        </div>
+        <div class="map-panel__body" data-map-body></div>
       </section>
 
       <section class="duplicates" id="duplicates" hidden>
