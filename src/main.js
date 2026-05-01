@@ -4,6 +4,9 @@ import { initPersonList } from './search/list.js';
 import { renderTree } from './tree/render.js';
 import { renderTimeline } from './timeline/render.js';
 import { renderPersonDetail } from './detail/panel.js';
+import { registerServiceWorker } from './util/pwa.js';
+
+registerServiceWorker();
 
 // ---------- DOM refs ----------
 const dropzone   = document.getElementById('dropzone');
