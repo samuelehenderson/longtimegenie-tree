@@ -118,7 +118,7 @@ export async function clearTree(workspaceId) {
 
 // ---------- kits (DNA) ----------
 
-export async function saveKit({ workspaceId, slot, vendor, filename, kitText, summary }) {
+export async function saveKit({ workspaceId, slot, vendor, filename, kitText, summary, linkedPersonId }) {
   if (!isStorageSupported()) return null;
   const ws = workspaceId || await getCurrentWorkspaceId();
   const id = `${ws}:${slot}`;
@@ -132,6 +132,7 @@ export async function saveKit({ workspaceId, slot, vendor, filename, kitText, su
         filename,
         kitText,
         summary,
+        linkedPersonId: linkedPersonId || null,
         importedAt: Date.now(),
       });
     });
@@ -139,6 +140,24 @@ export async function saveKit({ workspaceId, slot, vendor, filename, kitText, su
   } catch (err) {
     logErr('saveKit', err);
     return null;
+  }
+}
+
+export async function setKitLink({ workspaceId, slot, linkedPersonId }) {
+  if (!isStorageSupported()) return;
+  const ws = workspaceId || await getCurrentWorkspaceId();
+  const id = `${ws}:${slot}`;
+  try {
+    await tx('kits', 'readwrite', (s) => {
+      const req = s.get(id);
+      req.onsuccess = () => {
+        const row = req.result;
+        if (!row) return;
+        s.put({ ...row, linkedPersonId: linkedPersonId || null });
+      };
+    });
+  } catch (err) {
+    logErr('setKitLink', err);
   }
 }
 
