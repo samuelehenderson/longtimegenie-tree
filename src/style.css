@@ -129,6 +129,44 @@ body {
   background: var(--terracotta-dark);
 }
 
+/* ---------- install button ---------- */
+.install-slot {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.header-actions:not([hidden]) + .install-slot {
+  margin-left: 0;
+}
+
+.btn--install {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--install__icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.install-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--wheat-soft);
+  max-width: 22rem;
+  text-align: right;
+}
+
+.install-hint strong {
+  color: var(--wheat);
+  font-weight: 600;
+}
+
 /* ---------- main ---------- */
 .app-main {
   flex: 1;

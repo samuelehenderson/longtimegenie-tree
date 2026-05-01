@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LongTimeGenie Tree</title>
   <meta name="description" content="Genealogy research tool — load, view, and annotate family trees." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#2d5016" />
+  <meta name="application-name" content="LongTimeGenie Tree" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="LTG Tree" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
@@ -19,6 +27,15 @@
         <span class="loaded-pill" id="loaded-pill"></span>
         <button class="btn btn--ghost" id="btn-reload" type="button">Load different file</button>
         <button class="btn btn--ghost" id="btn-toggle-json" type="button">Show raw JSON</button>
+      </div>
+      <div class="install-slot">
+        <button class="btn btn--primary btn--install" id="btn-install" type="button" hidden>
+          <span class="btn--install__icon" aria-hidden="true">⬇</span>
+          <span>Install app</span>
+        </button>
+        <p class="install-hint" id="install-hint" hidden>
+          Open this site in <strong>Edge</strong> or <strong>Chrome</strong> on Windows to install it as an app.
+        </p>
       </div>
     </div>
   </header>

@@ -81,3 +81,32 @@ local-only pattern.
 Run `npm run build` and publish the `dist/` folder. Any static host works
 (Netlify, Vercel, GitHub Pages). The intended subdomain is
 `tree.longtimegenie.com`.
+
+## Install as a Windows app
+
+The site ships as a PWA (web manifest + service worker), so once it's served
+over HTTPS or `localhost` it can be installed as a real Windows app — its own
+taskbar icon, its own window, no browser chrome.
+
+**From the deployed site (recommended):**
+
+1. Open `https://tree.longtimegenie.com` in **Microsoft Edge** or **Google Chrome**.
+2. In the address bar, click the install icon (a monitor with a down-arrow), or
+   open the browser menu and choose **Apps → Install this site as an app**
+   (Edge) / **Cast, save and share → Install page as app** (Chrome).
+3. Confirm the name "LongTimeGenie Tree". Windows adds it to the Start menu.
+4. Right-click the running app in the taskbar and choose **Pin to taskbar** to
+   keep it there permanently.
+
+**From a local build (for trying it out before deploy):**
+
+```bash
+npm run build
+npm run preview   # serves dist/ on http://localhost:4173
+```
+
+Then open the `localhost` URL in Edge/Chrome and install as above. PWA install
+works on `localhost` without HTTPS.
+
+**To uninstall:** open the app, click the `…` menu in its title bar, and choose
+**Uninstall**.

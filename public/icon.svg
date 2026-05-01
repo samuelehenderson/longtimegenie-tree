@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="LongTimeGenie Tree">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d5016"/>
+      <stop offset="1" stop-color="#1f3810"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g fill="none" stroke="#d4a574" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 412 V 168"/>
+    <path d="M256 220 L 168 168"/>
+    <path d="M256 220 L 344 168"/>
+    <path d="M256 280 L 144 232"/>
+    <path d="M256 280 L 368 232"/>
+    <path d="M256 340 L 176 304"/>
+    <path d="M256 340 L 336 304"/>
+  </g>
+  <g fill="#e8d4b3" stroke="#2d5016" stroke-width="6">
+    <circle cx="256" cy="148" r="22"/>
+    <circle cx="168" cy="148" r="18"/>
+    <circle cx="344" cy="148" r="18"/>
+    <circle cx="144" cy="212" r="16"/>
+    <circle cx="368" cy="212" r="16"/>
+    <circle cx="176" cy="288" r="14"/>
+    <circle cx="336" cy="288" r="14"/>
+  </g>
+  <g fill="#c87456">
+    <ellipse cx="256" cy="420" rx="44" ry="14"/>
+  </g>
+</svg>
