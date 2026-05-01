@@ -167,6 +167,117 @@ body {
   font-weight: 600;
 }
 
+/* ---------- top-level tabs ---------- */
+.app-tabs {
+  max-width: 1500px;
+  margin: 0.85rem auto -1rem;
+  padding-bottom: 0;
+  display: flex;
+  gap: 0.25rem;
+  align-items: stretch;
+}
+
+.app-tab {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--wheat);
+  text-decoration: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+  position: relative;
+  bottom: -4px;
+}
+
+.app-tab:hover {
+  background: rgba(232, 223, 201, 0.1);
+  color: var(--cream);
+}
+
+.app-tab--active {
+  background: var(--cream);
+  color: var(--forest-dark);
+  border-color: var(--wheat);
+}
+
+.app-tab--active:hover {
+  background: var(--cream);
+  color: var(--forest-dark);
+}
+
+/* hide tree-specific header actions when not on the tree tab */
+body:not([data-active-tab="tree"]) #header-actions {
+  display: none !important;
+}
+
+/* ---------- pages ---------- */
+.page {
+  display: contents;
+}
+
+.page[hidden] {
+  display: none;
+}
+
+/* ---------- DNA placeholder ---------- */
+.dna-placeholder {
+  background: white;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 3rem 2rem;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.dna-placeholder__mark {
+  font-size: 3rem;
+  color: var(--terracotta);
+  display: block;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.dna-placeholder .section-title {
+  font-size: 1.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.dna-placeholder .section-help {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dna-roadmap {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dna-roadmap li {
+  background: var(--cream);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.dna-roadmap strong {
+  color: var(--forest);
+  font-weight: 700;
+  margin-right: 0.3rem;
+}
+
 /* ---------- main ---------- */
 .app-main {
   flex: 1;

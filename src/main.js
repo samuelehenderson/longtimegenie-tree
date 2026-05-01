@@ -6,9 +6,11 @@ import { renderTimeline } from './timeline/render.js';
 import { renderPersonDetail } from './detail/panel.js';
 import { registerServiceWorker } from './util/pwa.js';
 import { initInstallPrompt } from './util/install.js';
+import { initRouter } from './util/router.js';
 
 registerServiceWorker();
 initInstallPrompt();
+initRouter();
 
 // ---------- DOM refs ----------
 const dropzone   = document.getElementById('dropzone');
