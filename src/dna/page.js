@@ -15,7 +15,9 @@ import { compareKits } from './match.js';
 import { predictRelationship } from './relationships.js';
 import { segmentsToCsv, downloadCsv } from './csv.js';
 import { chromosomeLengthCm } from './genetic-map.js';
-import { saveKit, loadKitsForWorkspace, clearKitForSlot } from '../storage/index.js';
+import { saveKit, loadKitsForWorkspace, clearKitForSlot, setKitLink } from '../storage/index.js';
+import { getTreeModel, onTreeModelChange } from '../state/tree-model.js';
+import { computeRelationship, compareWithDnaPrediction } from '../tree/relationship.js';
 
 const SEX_LABELS = {
   male: 'Male',
@@ -30,10 +32,12 @@ const CHROMOSOMES_FOR_BROWSER = [
 ];
 
 const state = {
-  A: null, // { kit, summary }
+  A: null, // { kit, summary, text, linkedPersonId }
   B: null,
   comparison: null,
 };
+
+let openPicker = null; // teardown for any active picker so only one is open at once
 
 export function initDnaPage() {
   const compareBtn = document.getElementById('dna-compare-btn');
@@ -54,6 +58,12 @@ export function initDnaPage() {
   });
 
   restoreKitsFromStorage();
+
+  // Re-render the link UI whenever the tree model changes (loads or clears).
+  onTreeModelChange(() => {
+    renderSlotLinkArea('A');
+    renderSlotLinkArea('B');
+  });
 }
 
 async function restoreKitsFromStorage() {
@@ -62,12 +72,16 @@ async function restoreKitsFromStorage() {
   for (const row of rows) {
     if (!row.slot || !row.kitText || (row.slot !== 'A' && row.slot !== 'B')) continue;
     setSlotStatus(row.slot, `Restoring ${row.filename}…`);
-    // Yield so the status paints before we lock the main thread re-parsing.
     await new Promise((r) => setTimeout(r, 30));
     try {
       const kit = parseDnaText(row.kitText, row.filename);
       const summary = row.summary || summarize(kit);
-      state[row.slot] = { kit, summary, text: row.kitText };
+      state[row.slot] = {
+        kit,
+        summary,
+        text: row.kitText,
+        linkedPersonId: row.linkedPersonId || null,
+      };
       paintSlot(row.slot);
       setSlotStatus(row.slot, '');
     } catch (err) {
@@ -128,7 +142,7 @@ async function handleSlotFile(slot, file) {
     const text = await readDnaFileToText(file);
     const kit = parseDnaText(text, file.name);
     const summary = summarize(kit);
-    state[slot] = { kit, summary, text };
+    state[slot] = { kit, summary, text, linkedPersonId: null };
     paintSlot(slot);
     setSlotStatus(slot, '');
     refreshCompareButton();
@@ -141,6 +155,7 @@ async function handleSlotFile(slot, file) {
       filename: kit.filename,
       kitText: text,
       summary,
+      linkedPersonId: null,
     });
   } catch (err) {
     console.error(err);
@@ -155,6 +170,7 @@ function paintSlot(slot) {
   setText(`[data-slot-field="${slot}.snps"]`, summary.totalSnps.toLocaleString());
   setText(`[data-slot-field="${slot}.sex"]`, SEX_LABELS[summary.inferredSex] || summary.inferredSex);
   showSlotDropzone(slot, false);
+  renderSlotLinkArea(slot);
 }
 
 function showSlotDropzone(slot, showDropzone) {
@@ -168,6 +184,177 @@ function setSlotStatus(slot, msg, isError = false) {
   if (!el) return;
   el.textContent = msg;
   el.classList.toggle('status--error', isError);
+}
+
+// ---------- linking to a person in the tree ----------
+
+function renderSlotLinkArea(slot) {
+  const area = document.querySelector(`[data-slot-link-area="${slot}"]`);
+  if (!area) return;
+
+  const slotState = state[slot];
+  const treeModel = getTreeModel();
+
+  area.innerHTML = '';
+  closePicker();
+
+  if (!slotState) return;
+
+  if (!treeModel) {
+    area.innerHTML = `
+      <p class="dna-slot__link-hint">Load a tree on the Tree tab to link this kit to a person.</p>
+    `;
+    return;
+  }
+
+  if (slotState.linkedPersonId) {
+    const person = treeModel.byId.person.get(slotState.linkedPersonId);
+    const name = person?.name || slotState.linkedPersonId;
+    const wrap = document.createElement('div');
+    wrap.className = 'dna-slot__link';
+    wrap.innerHTML = `
+      <span class="dna-slot__link-label">
+        Linked to <strong>${escapeHtml(name)}</strong>
+      </span>
+      <button type="button" class="dna-slot__link-action" data-action="change">Change…</button>
+      <button type="button" class="dna-slot__link-action dna-slot__link-action--unlink" data-action="unlink">Unlink</button>
+    `;
+    wrap.querySelector('[data-action="unlink"]').addEventListener('click', () => {
+      assignLink(slot, null);
+    });
+    wrap.querySelector('[data-action="change"]').addEventListener('click', () => {
+      openPersonPicker(slot, area);
+    });
+    area.appendChild(wrap);
+  } else {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dna-slot__pick-btn';
+    btn.textContent = 'Link this kit to a person…';
+    btn.addEventListener('click', () => openPersonPicker(slot, area));
+    area.appendChild(btn);
+  }
+}
+
+function openPersonPicker(slot, host) {
+  closePicker();
+  const treeModel = getTreeModel();
+  if (!treeModel) return;
+
+  const picker = document.createElement('div');
+  picker.className = 'link-picker';
+  picker.innerHTML = `
+    <input type="search" class="link-picker__search" placeholder="Search people…" autocomplete="off" />
+    <div class="link-picker__list" role="listbox"></div>
+    <p class="link-picker__hint">Press Esc to cancel.</p>
+  `;
+  host.appendChild(picker);
+
+  const search = picker.querySelector('.link-picker__search');
+  const list = picker.querySelector('.link-picker__list');
+
+  const sortedPersons = [...treeModel.persons].sort(byNameThenId);
+  let query = '';
+
+  function paintList() {
+    const q = query.trim().toLowerCase();
+    const matched = q
+      ? sortedPersons.filter((p) => p.name.toLowerCase().includes(q))
+      : sortedPersons;
+    const top = matched.slice(0, 200);
+    if (!top.length) {
+      list.innerHTML = `<div class="link-picker__empty">No matches.</div>`;
+      return;
+    }
+    list.innerHTML = top.map((p) => `
+      <button type="button" class="link-picker__row" data-id="${escapeAttr(p.id)}">
+        <span class="link-picker__name">${escapeHtml(p.name) || '(unnamed)'}</span>
+        <span class="link-picker__dates">${escapeHtml(formatLifespan(p))}</span>
+      </button>
+    `).join('');
+    if (matched.length > top.length) {
+      const more = document.createElement('div');
+      more.className = 'link-picker__more';
+      more.textContent = `+ ${matched.length - top.length} more — refine your search.`;
+      list.appendChild(more);
+    }
+  }
+
+  paintList();
+
+  search.addEventListener('input', () => {
+    query = search.value;
+    paintList();
+  });
+  search.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePicker();
+  });
+  list.addEventListener('click', (e) => {
+    const row = e.target.closest('.link-picker__row');
+    if (!row) return;
+    assignLink(slot, row.dataset.id);
+  });
+
+  // Click outside closes the picker.
+  const onDocClick = (e) => {
+    if (!picker.contains(e.target) && !host.contains(e.target)) {
+      closePicker();
+    }
+  };
+  setTimeout(() => document.addEventListener('click', onDocClick), 0);
+
+  openPicker = () => {
+    document.removeEventListener('click', onDocClick);
+    picker.remove();
+    openPicker = null;
+  };
+
+  search.focus();
+}
+
+function closePicker() {
+  if (openPicker) openPicker();
+}
+
+function assignLink(slot, personId) {
+  const slotState = state[slot];
+  if (!slotState) return;
+  slotState.linkedPersonId = personId;
+  closePicker();
+  renderSlotLinkArea(slot);
+  setKitLink({ slot, linkedPersonId: personId });
+
+  // If a result panel is currently shown, re-render to update names + tree check.
+  if (state.comparison) {
+    renderResults(state.comparison, null, /* preserveResults */ true);
+  }
+}
+
+function byNameThenId(a, b) {
+  const sa = (a.surname || '').toLowerCase();
+  const sb = (b.surname || '').toLowerCase();
+  if (sa !== sb) return sa.localeCompare(sb);
+  const ga = (a.given || a.name || '').toLowerCase();
+  const gb = (b.given || b.name || '').toLowerCase();
+  if (ga !== gb) return ga.localeCompare(gb);
+  return a.id.localeCompare(b.id);
+}
+
+function formatLifespan(p) {
+  const b = p.birth?.date || '';
+  const d = p.death?.date || '';
+  if (!b && !d) return '';
+  return `${b}${b || d ? ' — ' : ''}${d}`;
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
+
+function escapeAttr(s) {
+  return escapeHtml(s);
 }
 
 function refreshCompareButton() {
@@ -196,12 +383,13 @@ async function runComparison() {
   const elapsed = Math.round(performance.now() - t0);
 
   state.comparison = result;
+  state.lastElapsedMs = elapsed;
   renderResults(result, elapsed);
   btn.disabled = false;
   hint.textContent = `Compared ${result.comparedSnps.toLocaleString()} SNPs in ${elapsed} ms.`;
 }
 
-function renderResults(result, elapsed) {
+function renderResults(result, elapsed, preserveScroll = false) {
   const totalCm = result.totalCm;
   setText('#dna-total-cm', `${formatCm(totalCm)} cM`);
   setText(
@@ -217,13 +405,95 @@ function renderResults(result, elapsed) {
   );
   setText('#dna-largest-cm', `${formatCm(result.largestCm)} cM`);
 
+  renderResultsHeader();
+  renderTreeCheck(totalCm);
   renderRelationships(totalCm);
   renderChromosomeBrowser(result);
   renderSegmentTable(result.segments);
 
   const resultsEl = document.getElementById('dna-results');
   resultsEl.hidden = false;
-  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!preserveScroll) {
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function renderResultsHeader() {
+  const titleEl = document.querySelector('#dna-results .section-title');
+  if (!titleEl) return;
+  const aName = linkedPersonName('A');
+  const bName = linkedPersonName('B');
+  titleEl.textContent = (aName && bName)
+    ? `${aName} × ${bName}`
+    : 'Comparison results';
+}
+
+function linkedPersonName(slot) {
+  const slotState = state[slot];
+  const treeModel = getTreeModel();
+  if (!slotState?.linkedPersonId || !treeModel) return null;
+  const person = treeModel.byId.person.get(slotState.linkedPersonId);
+  return person?.name || null;
+}
+
+function renderTreeCheck(totalCm) {
+  const el = document.getElementById('dna-tree-check');
+  if (!el) return;
+
+  const treeModel = getTreeModel();
+  const aId = state.A?.linkedPersonId;
+  const bId = state.B?.linkedPersonId;
+
+  if (!treeModel || !aId || !bId) {
+    el.hidden = true;
+    el.innerHTML = '';
+    return;
+  }
+
+  const treeRel = computeRelationship(treeModel, aId, bId);
+  const dnaTop = predictRelationship(totalCm)[0];
+  const verdict = compareWithDnaPrediction(treeRel, dnaTop);
+
+  const aName = linkedPersonName('A') || aId;
+  const bName = linkedPersonName('B') || bId;
+
+  if (!treeRel) {
+    el.hidden = false;
+    el.className = 'dna-tree-check dna-tree-check--none';
+    el.innerHTML = `
+      <div class="dna-tree-check__head">
+        <span class="dna-tree-check__icon" aria-hidden="true">∅</span>
+        <strong>${escapeHtml(aName)}</strong> and <strong>${escapeHtml(bName)}</strong>
+        share no recorded common ancestor in this tree.
+      </div>
+      <p class="dna-tree-check__detail">
+        DNA still says they share <strong>${formatCm(totalCm)} cM</strong> — best-fit
+        relationship: ${escapeHtml(dnaTop?.name || 'unknown')}. Worth investigating.
+      </p>
+    `;
+    return;
+  }
+
+  el.hidden = false;
+  el.className = `dna-tree-check dna-tree-check--${verdict}`;
+  const verdictText = {
+    match: 'matches the tree',
+    mismatch: 'differs from the tree',
+    unknown: 'compared with the tree',
+  }[verdict];
+  const verdictIcon = { match: '✓', mismatch: '⚠', unknown: '·' }[verdict];
+
+  el.innerHTML = `
+    <div class="dna-tree-check__head">
+      <span class="dna-tree-check__icon" aria-hidden="true">${verdictIcon}</span>
+      <strong>${escapeHtml(aName)}</strong> and <strong>${escapeHtml(bName)}</strong>
+      are recorded in the tree as <strong>${escapeHtml(treeRel.description)}</strong>.
+    </div>
+    <p class="dna-tree-check__detail">
+      DNA prediction <strong>${verdictText}</strong>: ${escapeHtml(dnaTop?.name || 'unknown')}
+      (${formatCm(totalCm)} cM total).
+    </p>
+  `;
 }
 
 function renderRelationships(totalCm) {

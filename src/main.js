@@ -16,6 +16,7 @@ import {
   loadNotesForWorkspace,
   saveNote,
 } from './storage/index.js';
+import { setTreeModel } from './state/tree-model.js';
 
 registerServiceWorker();
 initInstallPrompt();
@@ -107,6 +108,7 @@ btnReload?.addEventListener('click', () => {
   fileInput.value = '';
   importer.scrollIntoView({ behavior: 'smooth' });
   clearTree();
+  setTreeModel(null);
 });
 
 btnToggleJson?.addEventListener('click', () => {
@@ -147,6 +149,9 @@ async function loadModel(parsed, file) {
   // Pick a sensible initial focus: first person sorted by surname
   const initial = chooseInitialFocus(parsed);
   setFocus(initial);
+
+  // Make the tree available to other tabs (DNA linking, etc.).
+  setTreeModel(parsed);
 }
 
 function chooseInitialFocus(m) {

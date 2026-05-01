@@ -595,6 +595,234 @@ body:not([data-active-tab="tree"]) #header-actions {
   font-weight: 600;
 }
 
+/* ---------- DNA slot link area ---------- */
+.dna-slot__link-area {
+  position: relative;
+  margin-top: 0.85rem;
+}
+
+.dna-slot__link-hint {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--cream);
+  border-radius: 6px;
+  border: 1px dashed var(--rule);
+}
+
+.dna-slot__pick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
+  background: var(--cream);
+  color: var(--forest);
+  border: 1px solid var(--wheat);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.dna-slot__pick-btn:hover {
+  background: var(--wheat-soft);
+  border-color: var(--terracotta);
+}
+
+.dna-slot__link {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  background: var(--cream);
+  border: 1px solid var(--wheat);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.88rem;
+}
+
+.dna-slot__link-label {
+  flex: 1;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.dna-slot__link-label strong {
+  color: var(--forest-dark);
+}
+
+.dna-slot__link-action {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--forest);
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.dna-slot__link-action:hover {
+  background: white;
+  border-color: var(--forest-soft);
+}
+
+.dna-slot__link-action--unlink {
+  color: var(--terracotta-dark);
+  border-color: rgba(168, 91, 63, 0.25);
+}
+
+.dna-slot__link-action--unlink:hover {
+  background: rgba(200, 116, 86, 0.08);
+  border-color: var(--terracotta);
+}
+
+/* ---------- person picker popover ---------- */
+.link-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin-top: 0.4rem;
+  background: white;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  max-height: 22rem;
+}
+
+.link-picker__search {
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  padding: 0.6rem 0.85rem;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  outline: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.link-picker__search:focus {
+  background: var(--cream);
+}
+
+.link-picker__list {
+  flex: 1;
+  overflow: auto;
+  padding: 0.25rem;
+}
+
+.link-picker__row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  font-family: var(--sans);
+}
+
+.link-picker__row:hover,
+.link-picker__row:focus {
+  background: var(--cream);
+}
+
+.link-picker__name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.link-picker__dates {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.link-picker__empty,
+.link-picker__more {
+  padding: 0.6rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.link-picker__hint {
+  margin: 0;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--cream);
+  border-top: 1px solid var(--rule);
+  border-radius: 0 0 8px 8px;
+}
+
+/* ---------- DNA × Tree validation panel ---------- */
+.dna-tree-check {
+  margin: 1rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  background: var(--cream);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.dna-tree-check--match {
+  border-color: var(--forest-soft);
+  background: rgba(74, 107, 50, 0.08);
+}
+
+.dna-tree-check--mismatch {
+  border-color: var(--terracotta);
+  background: rgba(200, 116, 86, 0.08);
+}
+
+.dna-tree-check--none {
+  border-color: var(--wheat);
+  background: rgba(212, 165, 116, 0.1);
+}
+
+.dna-tree-check__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.dna-tree-check__icon {
+  font-size: 1.1rem;
+  font-weight: 700;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  background: white;
+}
+
+.dna-tree-check--match .dna-tree-check__icon  { color: var(--forest); }
+.dna-tree-check--mismatch .dna-tree-check__icon { color: var(--terracotta-dark); }
+.dna-tree-check--none .dna-tree-check__icon  { color: var(--wheat); }
+
+.dna-tree-check__detail {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-left: 2rem;
+}
+
 /* ---------- main ---------- */
 .app-main {
   flex: 1;
