@@ -8,10 +8,17 @@ import { registerServiceWorker } from './util/pwa.js';
 import { initInstallPrompt } from './util/install.js';
 import { initRouter } from './util/router.js';
 import { initDnaPage } from './dna/page.js';
+import {
+  ensureDefaultWorkspace,
+  saveTree,
+  loadTree,
+  clearTree,
+} from './storage/index.js';
 
 registerServiceWorker();
 initInstallPrompt();
 initRouter();
+ensureDefaultWorkspace();
 initDnaPage();
 
 // ---------- DOM refs ----------
@@ -76,6 +83,13 @@ initImporter({
       return;
     }
     loadModel(parsed, file);
+    // Persist the raw GEDCOM so the next session restores it. Best-effort.
+    saveTree({
+      gedcomText: text,
+      filename: file?.name || 'tree.ged',
+      sizeBytes: file?.size || text.length,
+      personCount: parsed.persons.length,
+    });
   },
   onError: (err) => console.error(err)
 });
@@ -89,6 +103,7 @@ btnReload?.addEventListener('click', () => {
   status.classList.remove('status--ok', 'status--error');
   fileInput.value = '';
   importer.scrollIntoView({ behavior: 'smooth' });
+  clearTree();
 });
 
 btnToggleJson?.addEventListener('click', () => {
@@ -175,4 +190,21 @@ function populateJsonView(parsed) {
     sources:  parsed.sources.map(stripRaw)
   };
   jsonView.textContent = JSON.stringify(display, null, 2);
+}
+
+// ---------- restore previous session ----------
+restoreTreeFromStorage();
+
+async function restoreTreeFromStorage() {
+  const saved = await loadTree();
+  if (!saved?.gedcomText) return;
+  try {
+    const parsed = parseGedcom(saved.gedcomText);
+    loadModel(parsed, { name: saved.filename, size: saved.sizeBytes });
+    status.textContent = `Restored ${saved.filename} from your last session.`;
+    status.classList.add('status--ok');
+  } catch (err) {
+    console.warn('[restore] failed to re-parse stored GEDCOM:', err);
+    clearTree();
+  }
 }

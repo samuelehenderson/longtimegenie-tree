@@ -9,12 +9,13 @@
 // Parsed kits stay in memory until the user removes them or refreshes the
 // tab. Nothing is uploaded.
 
-import { parseDnaFile } from './parser.js';
+import { parseDnaText, readDnaFileToText } from './parser.js';
 import { summarize } from './summary.js';
 import { compareKits } from './match.js';
 import { predictRelationship } from './relationships.js';
 import { segmentsToCsv, downloadCsv } from './csv.js';
 import { chromosomeLengthCm } from './genetic-map.js';
+import { saveKit, loadKitsForWorkspace, clearKitForSlot } from '../storage/index.js';
 
 const SEX_LABELS = {
   male: 'Male',
@@ -51,6 +52,31 @@ export function initDnaPage() {
     const stamp = new Date().toISOString().slice(0, 10);
     downloadCsv(`dna-segments-${stamp}.csv`, csv);
   });
+
+  restoreKitsFromStorage();
+}
+
+async function restoreKitsFromStorage() {
+  const rows = await loadKitsForWorkspace();
+  if (!rows.length) return;
+  for (const row of rows) {
+    if (!row.slot || !row.kitText || (row.slot !== 'A' && row.slot !== 'B')) continue;
+    setSlotStatus(row.slot, `Restoring ${row.filename}…`);
+    // Yield so the status paints before we lock the main thread re-parsing.
+    await new Promise((r) => setTimeout(r, 30));
+    try {
+      const kit = parseDnaText(row.kitText, row.filename);
+      const summary = row.summary || summarize(kit);
+      state[row.slot] = { kit, summary, text: row.kitText };
+      paintSlot(row.slot);
+      setSlotStatus(row.slot, '');
+    } catch (err) {
+      console.warn('[restore] failed to re-parse kit', row.filename, err);
+      await clearKitForSlot(row.slot);
+      setSlotStatus(row.slot, '', false);
+    }
+  }
+  refreshCompareButton();
 }
 
 function bindSlot(slot) {
@@ -91,6 +117,7 @@ function bindSlot(slot) {
     setSlotStatus(slot, '');
     refreshCompareButton();
     hideResults();
+    clearKitForSlot(slot);
   });
 }
 
@@ -98,13 +125,23 @@ async function handleSlotFile(slot, file) {
   setSlotStatus(slot, `Parsing ${file.name}…`);
   await new Promise((r) => setTimeout(r, 30));
   try {
-    const kit = await parseDnaFile(file);
+    const text = await readDnaFileToText(file);
+    const kit = parseDnaText(text, file.name);
     const summary = summarize(kit);
-    state[slot] = { kit, summary };
+    state[slot] = { kit, summary, text };
     paintSlot(slot);
     setSlotStatus(slot, '');
     refreshCompareButton();
     hideResults();
+
+    // Persist for the next session. Best-effort; does not block the UI.
+    saveKit({
+      slot,
+      vendor: kit.vendor,
+      filename: kit.filename,
+      kitText: text,
+      summary,
+    });
   } catch (err) {
     console.error(err);
     setSlotStatus(slot, `Couldn't read this file: ${err.message || err}`, true);
