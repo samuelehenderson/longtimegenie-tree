@@ -18,6 +18,7 @@ import {
 } from './storage/index.js';
 import { setTreeModel } from './state/tree-model.js';
 import { initDuplicatesPanel } from './ui/duplicates-panel.js';
+import { exportTreeAsPng, suggestedTreeFilename } from './ui/tree-export.js';
 
 registerServiceWorker();
 initInstallPrompt();
@@ -35,6 +36,7 @@ const headerActions = document.getElementById('header-actions');
 const loadedPill = document.getElementById('loaded-pill');
 const btnReload  = document.getElementById('btn-reload');
 const btnToggleJson = document.getElementById('btn-toggle-json');
+const btnExportImage = document.getElementById('btn-export-image');
 
 const personListEl = document.getElementById('person-list');
 const listSummary  = document.getElementById('list-summary');
@@ -116,6 +118,26 @@ btnToggleJson?.addEventListener('click', () => {
   output.hidden = !output.hidden;
   btnToggleJson.textContent = output.hidden ? 'Show raw JSON' : 'Hide raw JSON';
   if (!output.hidden) output.scrollIntoView({ behavior: 'smooth' });
+});
+
+btnExportImage?.addEventListener('click', async () => {
+  if (!model || !viewCanvas) return;
+  const original = btnExportImage.textContent;
+  btnExportImage.disabled = true;
+  btnExportImage.textContent = 'Saving…';
+  try {
+    const focusPerson = focusId ? model.byId.person.get(focusId) : null;
+    const filename = suggestedTreeFilename(focusPerson?.name);
+    await exportTreeAsPng(viewCanvas, filename);
+    btnExportImage.textContent = 'Saved ✓';
+    setTimeout(() => { btnExportImage.textContent = original; }, 1400);
+  } catch (err) {
+    console.error('[tree-export]', err);
+    btnExportImage.textContent = 'Save failed';
+    setTimeout(() => { btnExportImage.textContent = original; }, 2000);
+  } finally {
+    btnExportImage.disabled = false;
+  }
 });
 
 initDuplicatesPanel({
