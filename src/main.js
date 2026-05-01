@@ -7,10 +7,12 @@ import { renderPersonDetail } from './detail/panel.js';
 import { registerServiceWorker } from './util/pwa.js';
 import { initInstallPrompt } from './util/install.js';
 import { initRouter } from './util/router.js';
+import { initDnaPage } from './dna/page.js';
 
 registerServiceWorker();
 initInstallPrompt();
 initRouter();
+initDnaPage();
 
 // ---------- DOM refs ----------
 const dropzone   = document.getElementById('dropzone');

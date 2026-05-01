@@ -106,19 +106,69 @@
     </div>
 
     <div class="page" id="dna-page" data-page="dna" hidden>
-      <section class="dna-placeholder">
-        <span class="dna-placeholder__mark" aria-hidden="true">⌬</span>
-        <h2 class="section-title">DNA Compare</h2>
+      <section class="dna-importer" id="dna-importer">
+        <div class="dna-privacy" role="note">
+          <span class="dna-privacy__icon" aria-hidden="true">⚷</span>
+          <span>All DNA processing happens in your browser. Files are never uploaded.</span>
+        </div>
+
+        <h2 class="section-title">Upload a DNA kit</h2>
         <p class="section-help">
-          Coming soon — upload two raw DNA files (AncestryDNA first, others to follow)
-          and find shared cM, segments, and predicted relationship. Everything runs in
-          your browser, like the tree view.
+          AncestryDNA raw download (<code>.txt</code> or <code>.zip</code>). Get yours from
+          <em>Settings → Download your DNA</em> in your AncestryDNA account.
+          23andMe and others coming soon.
         </p>
-        <ul class="dna-roadmap">
-          <li><strong>v1</strong> — AncestryDNA + 23andMe parser, two-kit comparison, total cM, predicted relationship</li>
-          <li><strong>v2</strong> — chromosome browser, segment table, CSV export for DNA Painter</li>
-          <li><strong>v3</strong> — additional vendors (MyHeritage, FTDNA, LivingDNA), saved kits</li>
-        </ul>
+
+        <div class="dropzone" id="dna-dropzone" tabindex="0">
+          <input type="file" id="dna-file-input" accept=".txt,.csv,.zip" hidden />
+          <label for="dna-file-input" class="dropzone__label">
+            <strong>Choose a DNA file</strong>
+            <span>or drag &amp; drop one here</span>
+          </label>
+        </div>
+
+        <p class="status" id="dna-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="dna-summary" id="dna-summary" hidden>
+        <div class="dna-summary__head">
+          <h2 class="section-title">Kit summary</h2>
+          <button class="btn btn--ghost-on-light" id="dna-reload" type="button">Load different file</button>
+        </div>
+
+        <dl class="dna-stats">
+          <div class="dna-stat">
+            <dt>Vendor</dt>
+            <dd id="dna-summary-vendor">—</dd>
+          </div>
+          <div class="dna-stat">
+            <dt>File</dt>
+            <dd id="dna-summary-filename">—</dd>
+          </div>
+          <div class="dna-stat">
+            <dt>SNPs</dt>
+            <dd id="dna-summary-snps">—</dd>
+          </div>
+          <div class="dna-stat">
+            <dt>No-calls</dt>
+            <dd id="dna-summary-nocalls">—</dd>
+          </div>
+          <div class="dna-stat">
+            <dt>Inferred sex</dt>
+            <dd id="dna-summary-sex">—</dd>
+          </div>
+          <div class="dna-stat">
+            <dt>Parse time</dt>
+            <dd id="dna-summary-elapsed">—</dd>
+          </div>
+        </dl>
+
+        <h3 class="dna-subtitle">Chromosome distribution</h3>
+        <div class="chrom-distribution" id="dna-chrom-distribution" aria-label="SNPs per chromosome"></div>
+
+        <p class="dna-next">
+          Next step: load a second kit to compare and see shared cM. (Coming in the next update.)
+        </p>
       </section>
     </div>
   </main>

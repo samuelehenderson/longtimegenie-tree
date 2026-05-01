@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "fflate": "^0.8.2",
     "html2pdf.js": "^0.10.2",
     "parse-gedcom": "^2.0.1"
   },
