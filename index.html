@@ -106,69 +106,126 @@
     </div>
 
     <div class="page" id="dna-page" data-page="dna" hidden>
-      <section class="dna-importer" id="dna-importer">
+      <section class="dna-intro">
         <div class="dna-privacy" role="note">
           <span class="dna-privacy__icon" aria-hidden="true">⚷</span>
           <span>All DNA processing happens in your browser. Files are never uploaded.</span>
         </div>
-
-        <h2 class="section-title">Upload a DNA kit</h2>
+        <h2 class="section-title">DNA Compare</h2>
         <p class="section-help">
-          AncestryDNA raw download (<code>.txt</code> or <code>.zip</code>). Get yours from
-          <em>Settings → Download your DNA</em> in your AncestryDNA account.
-          23andMe and others coming soon.
+          Upload two AncestryDNA raw downloads (<code>.txt</code> or <code>.zip</code>) to
+          find shared cM, see matching segments by chromosome, and get a predicted
+          relationship range based on the Shared cM Project.
         </p>
-
-        <div class="dropzone" id="dna-dropzone" tabindex="0">
-          <input type="file" id="dna-file-input" accept=".txt,.csv,.zip" hidden />
-          <label for="dna-file-input" class="dropzone__label">
-            <strong>Choose a DNA file</strong>
-            <span>or drag &amp; drop one here</span>
-          </label>
-        </div>
-
-        <p class="status" id="dna-status" role="status" aria-live="polite"></p>
       </section>
 
-      <section class="dna-summary" id="dna-summary" hidden>
-        <div class="dna-summary__head">
-          <h2 class="section-title">Kit summary</h2>
-          <button class="btn btn--ghost-on-light" id="dna-reload" type="button">Load different file</button>
+      <div class="dna-slots">
+        <section class="dna-slot" data-slot="A">
+          <header class="dna-slot__head">
+            <h3 class="dna-slot__title">Kit A</h3>
+            <button class="btn btn--ghost-on-light dna-slot__reset" type="button" data-slot-reset="A" hidden>Remove</button>
+          </header>
+
+          <div class="dropzone dna-slot__dropzone" data-slot-dropzone="A" tabindex="0">
+            <input type="file" class="dna-slot__file" data-slot-file="A" accept=".txt,.csv,.zip" hidden />
+            <label class="dropzone__label">
+              <strong>Choose a DNA file</strong>
+              <span>or drag &amp; drop one here</span>
+            </label>
+          </div>
+
+          <p class="status dna-slot__status" data-slot-status="A" role="status" aria-live="polite"></p>
+
+          <dl class="dna-stats dna-slot__stats" data-slot-stats="A" hidden>
+            <div class="dna-stat"><dt>Vendor</dt><dd data-slot-field="A.vendor">—</dd></div>
+            <div class="dna-stat"><dt>File</dt><dd data-slot-field="A.filename">—</dd></div>
+            <div class="dna-stat"><dt>SNPs</dt><dd data-slot-field="A.snps">—</dd></div>
+            <div class="dna-stat"><dt>Inferred sex</dt><dd data-slot-field="A.sex">—</dd></div>
+          </dl>
+        </section>
+
+        <section class="dna-slot" data-slot="B">
+          <header class="dna-slot__head">
+            <h3 class="dna-slot__title">Kit B</h3>
+            <button class="btn btn--ghost-on-light dna-slot__reset" type="button" data-slot-reset="B" hidden>Remove</button>
+          </header>
+
+          <div class="dropzone dna-slot__dropzone" data-slot-dropzone="B" tabindex="0">
+            <input type="file" class="dna-slot__file" data-slot-file="B" accept=".txt,.csv,.zip" hidden />
+            <label class="dropzone__label">
+              <strong>Choose a DNA file</strong>
+              <span>or drag &amp; drop one here</span>
+            </label>
+          </div>
+
+          <p class="status dna-slot__status" data-slot-status="B" role="status" aria-live="polite"></p>
+
+          <dl class="dna-stats dna-slot__stats" data-slot-stats="B" hidden>
+            <div class="dna-stat"><dt>Vendor</dt><dd data-slot-field="B.vendor">—</dd></div>
+            <div class="dna-stat"><dt>File</dt><dd data-slot-field="B.filename">—</dd></div>
+            <div class="dna-stat"><dt>SNPs</dt><dd data-slot-field="B.snps">—</dd></div>
+            <div class="dna-stat"><dt>Inferred sex</dt><dd data-slot-field="B.sex">—</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <div class="dna-actions">
+        <button class="btn btn--primary dna-compare-btn" id="dna-compare-btn" type="button" disabled>
+          Compare kits
+        </button>
+        <p class="dna-actions__hint" id="dna-compare-hint">Load both kits to enable comparison.</p>
+      </div>
+
+      <section class="dna-results" id="dna-results" hidden>
+        <header class="dna-results__head">
+          <h2 class="section-title">Comparison results</h2>
+          <button class="btn btn--ghost-on-light" id="dna-csv-btn" type="button">Download segments CSV</button>
+        </header>
+
+        <div class="dna-headline">
+          <div class="dna-headline__stat">
+            <div class="dna-headline__value" id="dna-total-cm">—</div>
+            <div class="dna-headline__label" id="dna-total-cm-detail">total shared cM</div>
+          </div>
+          <div class="dna-headline__stat">
+            <div class="dna-headline__value" id="dna-segment-count">—</div>
+            <div class="dna-headline__label" id="dna-segment-detail">shared segments</div>
+          </div>
+          <div class="dna-headline__stat">
+            <div class="dna-headline__value" id="dna-largest-cm">—</div>
+            <div class="dna-headline__label">largest segment</div>
+          </div>
         </div>
 
-        <dl class="dna-stats">
-          <div class="dna-stat">
-            <dt>Vendor</dt>
-            <dd id="dna-summary-vendor">—</dd>
-          </div>
-          <div class="dna-stat">
-            <dt>File</dt>
-            <dd id="dna-summary-filename">—</dd>
-          </div>
-          <div class="dna-stat">
-            <dt>SNPs</dt>
-            <dd id="dna-summary-snps">—</dd>
-          </div>
-          <div class="dna-stat">
-            <dt>No-calls</dt>
-            <dd id="dna-summary-nocalls">—</dd>
-          </div>
-          <div class="dna-stat">
-            <dt>Inferred sex</dt>
-            <dd id="dna-summary-sex">—</dd>
-          </div>
-          <div class="dna-stat">
-            <dt>Parse time</dt>
-            <dd id="dna-summary-elapsed">—</dd>
-          </div>
-        </dl>
-
-        <h3 class="dna-subtitle">Chromosome distribution</h3>
-        <div class="chrom-distribution" id="dna-chrom-distribution" aria-label="SNPs per chromosome"></div>
-
-        <p class="dna-next">
-          Next step: load a second kit to compare and see shared cM. (Coming in the next update.)
+        <h3 class="dna-subtitle">Predicted relationship</h3>
+        <ol class="dna-relationships" id="dna-relationships"></ol>
+        <p class="dna-disclaimer">
+          Predictions use Shared cM Project ranges. Many close relationships
+          overlap heavily and can't be distinguished by autosomal cM alone.
+          v1 uses a per-chromosome linear genetic map (10–20 % per-segment cM
+          error); a higher-resolution recombination map is on the roadmap.
         </p>
+
+        <h3 class="dna-subtitle">Chromosome browser</h3>
+        <div class="chromosome-browser" id="dna-chromosome-browser" aria-label="Shared segments by chromosome"></div>
+
+        <details class="dna-segments-table">
+          <summary>Show all segments</summary>
+          <div class="dna-segments-table__wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Chr</th>
+                  <th>Start (bp)</th>
+                  <th>End (bp)</th>
+                  <th>Length (cM)</th>
+                  <th>SNPs</th>
+                </tr>
+              </thead>
+              <tbody id="dna-segments-tbody"></tbody>
+            </table>
+          </div>
+        </details>
       </section>
     </div>
   </main>
