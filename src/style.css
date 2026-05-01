@@ -823,6 +823,254 @@ body:not([data-active-tab="tree"]) #header-actions {
   padding-left: 2rem;
 }
 
+/* ---------- PDF research report (rendered off-canvas, then rasterized) ---------- */
+.report {
+  position: absolute;
+  left: -10000px;
+  top: 0;
+  width: 8.5in;
+  background: white;
+  color: #2a2520;
+  font-family: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+/* When actively rendering, html2pdf needs the element painted, but we
+   keep it off-screen. The class is a no-op visual change today; reserved
+   so we have a hook if we ever need to flash it on-screen for debugging. */
+.report--rendering {
+  /* intentionally empty */
+}
+
+.report__page {
+  padding: 24px 28px;
+  font-size: 13px;
+}
+
+.report__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #d4a574;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.report__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.report__mark {
+  font-size: 30px;
+  color: #2d5016;
+  line-height: 1;
+}
+
+.report__brand-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f3810;
+  letter-spacing: 0.02em;
+}
+
+.report__brand-tag {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6b6357;
+  margin-top: 2px;
+}
+
+.report__meta {
+  text-align: right;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #6b6357;
+}
+
+.report__name {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1f3810;
+  margin: 6px 0 2px;
+  line-height: 1.15;
+}
+
+.report__lifespan {
+  margin: 0 0 18px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #6b6357;
+}
+
+.report__id {
+  font-family: 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.report__section {
+  margin: 16px 0;
+  page-break-inside: avoid;
+}
+
+.report__section h2 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: #2d5016;
+  border-bottom: 1px solid #e8dfc9;
+  padding-bottom: 4px;
+  margin: 0 0 8px;
+}
+
+.report__facts {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.report__fact {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+}
+
+.report__fact dt {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b6357;
+  margin: 0;
+  padding-top: 3px;
+}
+
+.report__fact dd {
+  margin: 0;
+  font-size: 13px;
+}
+
+.report__missing { color: #6b6357; }
+.report__place   { color: #6b6357; }
+
+.report__person-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1px 0;
+}
+
+.report__person-name {
+  font-weight: 600;
+}
+
+.report__person-dates {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #6b6357;
+}
+
+.report__timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.report__timeline li {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  border-left: 2px solid #e8dfc9;
+  padding-left: 10px;
+}
+
+.report__timeline-date {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #6b6357;
+  padding-top: 1px;
+}
+
+.report__timeline-content { font-size: 13px; }
+
+.report__timeline-note {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #6b6357;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+.report__sources {
+  list-style: decimal;
+  padding-left: 18px;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.report__source { font-size: 13px; }
+.report__source-title  { font-weight: 600; }
+
+.report__source-author,
+.report__source-pub {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: #6b6357;
+}
+
+.report__source-refs {
+  list-style: none;
+  padding: 4px 0 0;
+  margin: 0;
+}
+
+.report__source-ref {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 10px;
+  color: #6b6357;
+}
+
+.report__source-event { margin-right: 8px; }
+
+.report__source-page {
+  background: #faf6ed;
+  padding: 0.05rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+  font-size: 10px;
+}
+
+.report__notes {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  background: #faf6ed;
+  border-left: 3px solid #d4a574;
+  padding: 10px 14px;
+  border-radius: 0 4px 4px 0;
+  white-space: normal;
+  line-height: 1.55;
+}
+
+.report__footer {
+  margin-top: 22px;
+  padding-top: 8px;
+  border-top: 1px solid #e8dfc9;
+  display: flex;
+  justify-content: space-between;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 9px;
+  color: #6b6357;
+}
+
 /* ---------- map panel ---------- */
 .map-panel {
   background: white;

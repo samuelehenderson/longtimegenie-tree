@@ -20,6 +20,7 @@ import { setTreeModel } from './state/tree-model.js';
 import { initDuplicatesPanel } from './ui/duplicates-panel.js';
 import { exportTreeAsPng, suggestedTreeFilename } from './ui/tree-export.js';
 import { initMapPanel } from './map/page.js';
+import { exportPersonReport } from './ui/report.js';
 
 registerServiceWorker();
 initInstallPrompt();
@@ -38,6 +39,7 @@ const loadedPill = document.getElementById('loaded-pill');
 const btnReload  = document.getElementById('btn-reload');
 const btnToggleJson = document.getElementById('btn-toggle-json');
 const btnExportImage = document.getElementById('btn-export-image');
+const btnExportPdf   = document.getElementById('btn-export-pdf');
 
 const personListEl = document.getElementById('person-list');
 const listSummary  = document.getElementById('list-summary');
@@ -119,6 +121,29 @@ btnToggleJson?.addEventListener('click', () => {
   output.hidden = !output.hidden;
   btnToggleJson.textContent = output.hidden ? 'Show raw JSON' : 'Hide raw JSON';
   if (!output.hidden) output.scrollIntoView({ behavior: 'smooth' });
+});
+
+btnExportPdf?.addEventListener('click', async () => {
+  if (!model || !focusId) return;
+  const original = btnExportPdf.textContent;
+  btnExportPdf.disabled = true;
+  btnExportPdf.textContent = 'Building PDF…';
+  try {
+    await exportPersonReport({
+      container: document.getElementById('report-stage'),
+      model,
+      focusId,
+      notesMap,
+    });
+    btnExportPdf.textContent = 'Saved ✓';
+    setTimeout(() => { btnExportPdf.textContent = original; }, 1400);
+  } catch (err) {
+    console.error('[pdf-report]', err);
+    btnExportPdf.textContent = 'Save failed';
+    setTimeout(() => { btnExportPdf.textContent = original; }, 2000);
+  } finally {
+    btnExportPdf.disabled = false;
+  }
 });
 
 btnExportImage?.addEventListener('click', async () => {

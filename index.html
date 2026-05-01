@@ -29,6 +29,7 @@
         <button class="btn btn--ghost" id="btn-show-map" type="button">Show map</button>
         <button class="btn btn--ghost" id="btn-find-duplicates" type="button">Find duplicates</button>
         <button class="btn btn--ghost" id="btn-export-image" type="button">Save as image</button>
+        <button class="btn btn--ghost" id="btn-export-pdf" type="button">PDF report</button>
         <button class="btn btn--ghost" id="btn-toggle-json" type="button">Show raw JSON</button>
       </div>
       <div class="install-slot">
@@ -260,6 +261,9 @@
       </section>
     </div>
   </main>
+
+  <!-- Off-canvas container that the report exporter populates and rasterizes. -->
+  <div id="report-stage" class="report" aria-hidden="true"></div>
 
   <footer class="app-footer">
     <small>LongTimeGenie Tree · v0.2 · all data stays local</small>
