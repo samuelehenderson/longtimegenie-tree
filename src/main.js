@@ -128,7 +128,10 @@ btnExportImage?.addEventListener('click', async () => {
   try {
     const focusPerson = focusId ? model.byId.person.get(focusId) : null;
     const filename = suggestedTreeFilename(focusPerson?.name);
-    await exportTreeAsPng(viewCanvas, filename);
+    await exportTreeAsPng(viewCanvas, filename, {
+      focusName: focusPerson?.name,
+      sourceLabel: currentView === 'timeline' ? 'Timeline view' : 'Tree view',
+    });
     btnExportImage.textContent = 'Saved ✓';
     setTimeout(() => { btnExportImage.textContent = original; }, 1400);
   } catch (err) {

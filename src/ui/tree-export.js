@@ -11,10 +11,11 @@
 // worth taking on a hefty dep for v1.
 
 const PADDING = 24;
+const FOOTER_HEIGHT = 38;
 const SCALE = 2; // retina-quality
 const BACKGROUND = '#faf6ed';
 
-export async function exportTreeAsPng(sourceEl, suggestedName = 'tree.png') {
+export async function exportTreeAsPng(sourceEl, suggestedName = 'tree.png', meta = {}) {
   if (!sourceEl) throw new Error('exportTreeAsPng: no source element.');
 
   const w = Math.max(sourceEl.scrollWidth, sourceEl.offsetWidth);
@@ -22,24 +23,54 @@ export async function exportTreeAsPng(sourceEl, suggestedName = 'tree.png') {
   if (w === 0 || h === 0) throw new Error('Tree view has no content to export.');
 
   const totalW = w + PADDING * 2;
-  const totalH = h + PADDING * 2;
+  const totalH = h + PADDING * 2 + FOOTER_HEIGHT;
 
   const css = collectPageCss();
   const innerHtml = sourceEl.outerHTML;
+  const footerHtml = renderFooter(meta);
 
   // The wrapper carries the cream brand background, padding, and a
-  // small attribution footer so the saved image stands on its own.
+  // brand footer so the saved image stands on its own as a deliverable.
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${totalW}" height="${totalH}" viewBox="0 0 ${totalW} ${totalH}">
   <foreignObject x="0" y="0" width="${totalW}" height="${totalH}">
-    <div xmlns="http://www.w3.org/1999/xhtml" style="background:${BACKGROUND};width:${totalW}px;height:${totalH}px;padding:${PADDING}px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,sans-serif;color:#2a2520;">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="background:${BACKGROUND};width:${totalW}px;height:${totalH}px;padding:${PADDING}px ${PADDING}px 0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,sans-serif;color:#2a2520;display:flex;flex-direction:column;">
       <style><![CDATA[${css}]]></style>
-      ${innerHtml}
+      <div style="flex:1;min-height:0;">${innerHtml}</div>
+      ${footerHtml}
     </div>
   </foreignObject>
 </svg>`;
 
   const blob = await rasterizeSvg(svg, totalW, totalH);
   downloadBlob(suggestedName, blob);
+}
+
+function renderFooter({ focusName, sourceLabel } = {}) {
+  const today = new Date().toISOString().slice(0, 10);
+  // Right-side caption: focused person + date, falling back to date alone.
+  const rightParts = [];
+  if (focusName) rightParts.push(escapeXml(focusName));
+  if (sourceLabel) rightParts.push(escapeXml(sourceLabel));
+  rightParts.push(today);
+  const rightCaption = rightParts.join(' · ');
+
+  return `
+    <div style="height:${FOOTER_HEIGHT}px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;border-top:1px solid #e8dfc9;margin-top:14px;font-size:12px;color:#6b6357;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:20px;color:#2d5016;line-height:1;">𓊝</span>
+        <span style="font-family:'Cormorant Garamond','Iowan Old Style',Georgia,serif;font-weight:600;font-size:14px;color:#1f3810;letter-spacing:0.02em;">LongTimeGenie Tree</span>
+        <span style="color:#a85b3f;">·</span>
+        <span style="font-size:11px;">tree.longtimegenie.com</span>
+      </div>
+      <div style="font-size:11px;color:#6b6357;">${rightCaption}</div>
+    </div>
+  `;
+}
+
+function escapeXml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
 }
 
 function rasterizeSvg(svgString, w, h) {
