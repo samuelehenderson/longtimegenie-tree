@@ -6,7 +6,7 @@
 // surface for what's essentially 60 lines of code.
 
 const DB_NAME = 'longtimegenie-tree';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 const SCHEMA = {
   // Keyed by workspace id ('default' for now; multi-workspace UI later).
@@ -25,6 +25,10 @@ const SCHEMA = {
   },
   // App-level scalars (current workspace, etc.).
   app: { keyPath: 'key' },
+  // Geocoder cache. Keyed by normalized place string. Survives across
+  // workspaces — coordinates for "Detroit, MI" don't depend on whose
+  // tree it's in.
+  geocache: { keyPath: 'place' },
 };
 
 let dbPromise = null;

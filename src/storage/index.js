@@ -221,6 +221,29 @@ export async function loadNotesForWorkspace(workspaceId) {
   }
 }
 
+// ---------- geocache ----------
+
+export async function getCachedGeocode(place) {
+  if (!isStorageSupported()) return null;
+  try {
+    return (await tx('geocache', 'readonly', (s) => reqToPromise(s.get(place)))) || null;
+  } catch (err) {
+    logErr('getCachedGeocode', err);
+    return null;
+  }
+}
+
+export async function saveCachedGeocode(entry) {
+  if (!isStorageSupported() || !entry?.place) return;
+  try {
+    await tx('geocache', 'readwrite', (s) => {
+      s.put({ ...entry, lookedUpAt: Date.now() });
+    });
+  } catch (err) {
+    logErr('saveCachedGeocode', err);
+  }
+}
+
 // ---------- destructive ----------
 
 export async function resetAllStorage() {
