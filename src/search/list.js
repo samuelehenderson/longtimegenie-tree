@@ -3,7 +3,7 @@
 
 import { lifespan } from '../util/format.js';
 
-export function initPersonList({ container, summary, searchInput, model, onSelect, getActiveId }) {
+export function initPersonList({ container, summary, searchInput, model, onSelect, getActiveId, notes }) {
   const sorted = [...model.persons].sort(byNameThenId);
   let query = '';
 
@@ -24,9 +24,10 @@ export function initPersonList({ container, summary, searchInput, model, onSelec
     const html = list.map((p) => {
       const cls = ['person-row'];
       if (p.id === activeId) cls.push('person-row--active');
+      const hasNote = notes?.has(p.id);
       return `
         <div class="${cls.join(' ')}" data-id="${escapeAttr(p.id)}" role="option" tabindex="0">
-          <span class="person-row__name">${escapeHtml(p.name) || '(unnamed)'}</span>
+          <span class="person-row__name">${escapeHtml(p.name) || '(unnamed)'}${hasNote ? '<span class="person-row__note-dot" title="Has research notes" aria-label="Has research notes"></span>' : ''}</span>
           <span class="person-row__dates">${escapeHtml(lifespan(p))}</span>
         </div>
       `;

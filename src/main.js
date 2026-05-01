@@ -13,6 +13,8 @@ import {
   saveTree,
   loadTree,
   clearTree,
+  loadNotesForWorkspace,
+  saveNote,
 } from './storage/index.js';
 
 registerServiceWorker();
@@ -49,6 +51,7 @@ let model = null;
 let focusId = null;
 let listApi = null;
 let currentView = 'tree';
+let notesMap = new Map();
 
 const VIEW_HINTS = {
   tree:     'Click any person to re-center the tree.',
@@ -113,7 +116,7 @@ btnToggleJson?.addEventListener('click', () => {
 });
 
 // ---------- model loaded ----------
-function loadModel(parsed, file) {
+async function loadModel(parsed, file) {
   model = parsed;
 
   // Show workspace, hide importer
@@ -127,6 +130,9 @@ function loadModel(parsed, file) {
   // Pre-populate the JSON view (kept hidden until requested)
   populateJsonView(parsed);
 
+  // Load any saved per-person notes for this workspace.
+  notesMap = await loadNotesForWorkspace();
+
   // Initialize the person list with search
   listApi = initPersonList({
     container: personListEl,
@@ -134,7 +140,8 @@ function loadModel(parsed, file) {
     searchInput,
     model: parsed,
     onSelect: setFocus,
-    getActiveId: () => focusId
+    getActiveId: () => focusId,
+    notes: notesMap,
   });
 
   // Pick a sensible initial focus: first person sorted by surname
@@ -159,8 +166,29 @@ function setFocus(id) {
   if (!model) return;
   focusId = id;
   renderCurrentView();
-  renderPersonDetail({ container: detailContent, model, focusId, onSelect: setFocus });
+  renderPersonDetail({
+    container: detailContent,
+    model,
+    focusId,
+    onSelect: setFocus,
+    notes: notesMap,
+    onNoteChange: handleNoteChange,
+  });
   listApi?.rerender();
+}
+
+async function handleNoteChange(personId, text) {
+  const had = notesMap.has(personId);
+  if (text && text.trim()) {
+    notesMap.set(personId, text);
+  } else {
+    notesMap.delete(personId);
+  }
+  // The list's dot indicator only flips when notes appear or disappear;
+  // re-render only on those transitions to avoid churn on every keystroke.
+  const has = notesMap.has(personId);
+  if (had !== has) listApi?.rerender();
+  await saveNote({ personId, text });
 }
 
 function renderCurrentView() {
