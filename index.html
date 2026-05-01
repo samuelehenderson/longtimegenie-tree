@@ -26,6 +26,7 @@
       <div class="header-actions" id="header-actions" hidden>
         <span class="loaded-pill" id="loaded-pill"></span>
         <button class="btn btn--ghost" id="btn-reload" type="button">Load different file</button>
+        <button class="btn btn--ghost" id="btn-find-duplicates" type="button">Find duplicates</button>
         <button class="btn btn--ghost" id="btn-toggle-json" type="button">Show raw JSON</button>
       </div>
       <div class="install-slot">
@@ -94,6 +95,17 @@
           </div>
           <div class="detail-content" id="detail-content"></div>
         </aside>
+      </section>
+
+      <section class="duplicates" id="duplicates" hidden>
+        <div class="duplicates__header">
+          <div>
+            <h2 class="section-title">Possible duplicates</h2>
+            <p class="duplicates__summary" id="duplicates-summary"></p>
+          </div>
+          <button class="btn btn--ghost-on-light" id="btn-close-duplicates" type="button">Close</button>
+        </div>
+        <div class="duplicates__list" id="duplicates-list"></div>
       </section>
 
       <section class="output" id="output" hidden>

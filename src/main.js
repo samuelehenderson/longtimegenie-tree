@@ -17,6 +17,7 @@ import {
   saveNote,
 } from './storage/index.js';
 import { setTreeModel } from './state/tree-model.js';
+import { initDuplicatesPanel } from './ui/duplicates-panel.js';
 
 registerServiceWorker();
 initInstallPrompt();
@@ -115,6 +116,16 @@ btnToggleJson?.addEventListener('click', () => {
   output.hidden = !output.hidden;
   btnToggleJson.textContent = output.hidden ? 'Show raw JSON' : 'Hide raw JSON';
   if (!output.hidden) output.scrollIntoView({ behavior: 'smooth' });
+});
+
+initDuplicatesPanel({
+  openBtn:  document.getElementById('btn-find-duplicates'),
+  closeBtn: document.getElementById('btn-close-duplicates'),
+  panel:    document.getElementById('duplicates'),
+  summary:  document.getElementById('duplicates-summary'),
+  list:     document.getElementById('duplicates-list'),
+  getModel: () => model,
+  onSelectPerson: setFocus,
 });
 
 // ---------- model loaded ----------
