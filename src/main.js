@@ -189,39 +189,68 @@ initMapPanel({
 
 // ---------- model loaded ----------
 async function loadModel(parsed, file) {
-  model = parsed;
+  try {
+    model = parsed;
 
-  // Show workspace, hide importer
-  importer.hidden = true;
-  workspace.hidden = false;
-  headerActions.hidden = false;
-  loadedPill.textContent = file
-    ? `${file.name} · ${parsed.persons.length} people`
-    : `${parsed.persons.length} people`;
+    // Show workspace, hide importer
+    importer.hidden = true;
+    workspace.hidden = false;
+    headerActions.hidden = false;
+    loadedPill.textContent = file
+      ? `${file.name} · ${parsed.persons.length} people`
+      : `${parsed.persons.length} people`;
 
-  // Pre-populate the JSON view (kept hidden until requested)
-  populateJsonView(parsed);
+    // Pre-populate the JSON view (kept hidden until requested)
+    populateJsonView(parsed);
 
-  // Load any saved per-person notes for this workspace.
-  notesMap = await loadNotesForWorkspace();
+    // Load any saved per-person notes for this workspace.
+    // Notes load is best-effort — if IndexedDB hangs or rejects, fall
+    // back to an empty map so the list / detail rendering still runs.
+    notesMap = await loadNotesSafely();
 
-  // Initialize the person list with search
-  listApi = initPersonList({
-    container: personListEl,
-    summary: listSummary,
-    searchInput,
-    model: parsed,
-    onSelect: setFocus,
-    getActiveId: () => focusId,
-    notes: notesMap,
-  });
+    // Initialize the person list with search
+    listApi = initPersonList({
+      container: personListEl,
+      summary: listSummary,
+      searchInput,
+      model: parsed,
+      onSelect: setFocus,
+      getActiveId: () => focusId,
+      notes: notesMap,
+    });
 
-  // Pick a sensible initial focus: first person sorted by surname
-  const initial = chooseInitialFocus(parsed);
-  setFocus(initial);
+    // Pick a sensible initial focus: first person sorted by surname
+    const initial = chooseInitialFocus(parsed);
+    setFocus(initial);
 
-  // Make the tree available to other tabs (DNA linking, etc.).
-  setTreeModel(parsed);
+    // Make the tree available to other tabs (DNA linking, etc.).
+    setTreeModel(parsed);
+  } catch (err) {
+    console.error('[loadModel] failed:', err);
+    if (status) {
+      status.textContent = `Couldn't render the tree: ${err?.message || err}. Check the browser console for details.`;
+      status.classList.add('status--error');
+    }
+  }
+}
+
+async function loadNotesSafely() {
+  // Race the IDB call against a 4 s timeout. If something has the DB
+  // wedged (very rare — hung upgrade, tab-blocked, etc.) we still want
+  // the rest of the UI to render rather than hang on a black detail
+  // panel forever.
+  try {
+    return await Promise.race([
+      loadNotesForWorkspace(),
+      new Promise((resolve) => setTimeout(() => {
+        console.warn('[notes] load timed out after 4s — continuing without notes.');
+        resolve(new Map());
+      }, 4000)),
+    ]);
+  } catch (err) {
+    console.warn('[notes] load failed:', err);
+    return new Map();
+  }
 }
 
 function chooseInitialFocus(m) {
