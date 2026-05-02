@@ -1,6 +1,6 @@
 // Minimal service worker: enables PWA install + offline app shell.
 // Bumping CACHE_VERSION invalidates old caches on next activation.
-const CACHE_VERSION = 'ltg-tree-v1';
+const CACHE_VERSION = 'ltg-tree-v2';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
